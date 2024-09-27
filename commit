@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# A script to automate the commit and push processes of git
+
+echo "Enter the files to commit";
+read -r mess;
+git add "$mess"
+echo "Enter the commit message"
+read -r sage;
+git commit -m "$sage"
+git push
