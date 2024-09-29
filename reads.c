@@ -8,10 +8,10 @@ int main(void)
   
   char *string;
   size_t wordsize = 0;
-  ssize ret;
+  ssize_t ret;
 
   printf("#cisfun: ");
   ret = getline(&string, &wordsize, stdin);
-  printf("%s\n Has %l chars", string, ret);
+  printf("%s\n Has %ld chars", string, ret);
   return (0);
 }
