@@ -22,60 +22,46 @@ void prompt(void)
  * Return: 0 on sucess
  */
 
-int main(int argc, char *argv[], char *envp[])
+int main(void)
 {
 
   pid_t child;
-  int i = 0, status, size;
+  int i = 0, status;
   size_t nchars;
   ssize_t chars;
-  char *command, *token, *av[1024];
-  
-  (void) argc;
-  (void) argv;
-  size = 0;
+  char *command = NULL, *token, **av;
+
+  av = malloc(1024 * (sizeof(char *)));
   while (true)
     {
       prompt();
       chars = getline(&command, &nchars, stdin);
-      printf("The acquired command is: %s\n", command);
-      if ((chars == -1))
+      if (chars == -1)
+	break;
+      token = strtok(command, "\t\n");
+      av = malloc(1024 * (sizeof (char *)));
+      if (av == NULL)
 	{
-	  break;
+	  perror("cannot allocate data to array");
+	  exit(1);
 	}
-      token = strtok(command, " ");
-      printf("Received token: %s\n", token);
-      av[size] = token;
-      printf("Argument token put in array is: %s\n", av[size]);
-      while (true)
+      for (i = 0;token; i++)
 	{
-	  if (token == NULL)
-	    {
-	      free(command);
-	      break;
-	    }
-	  size+=1;
-	  token = strtok(NULL, command);
-	  printf("received token is: %s \n", token);
-	  av[size] = token;
-	  printf("token put in array is: %s\n", av[size]);
+	  av[i] = token;
+	  token = strtok(NULL, "\t\n");
 	}
-      while (av[i])
-	{
-	  printf("The array after realloc is now %s\n", av[i]);
-	  i++;
-	}
+      av[++i] = NULL;
       child = fork();
       if (child == 0)
 	{
-	  if (execve(av[0],av, envp) == -1)
-	    printf("cpouldn't execute cmd: %s \n", av[0]);
+	  if (execve(av[0], av, NULL) == -1)
+	    perror("Error executing that partiocular command");
 	}
       else
-	{
-	  wait(&status);
-	  kill(child, SIGTERM);
-	}
+	wait(&status);
+      i = 0;
+      free(command);
     }
-  return 0;
+  free(av);
+  return (0);
 }
